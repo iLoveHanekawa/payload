@@ -1,0 +1,1 @@
+Heading|Alignment|LeftIndent|RightIndent|Bold|Italics|Underline|Strike| Feature |Sub|Super|Code|Link

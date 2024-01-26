@@ -1,6 +1,7 @@
-import { BoldTextFeature, HTMLConverterFeature, HeadingFeature, InlineCodeTextFeature, TreeViewFeature, lexicalEditor, lexicalHTML } from '@payloadcms/richtext-lexical';
+import { BoldTextFeature, HTMLConverterFeature, HeadingFeature, InlineCodeTextFeature, LinkFeature, OrderedListFeature, TreeViewFeature, UnorderedListFeature, lexicalEditor, lexicalHTML } from '@payloadcms/richtext-lexical';
 import { CollectionConfig } from 'payload/types'
 import { MarkFeature } from '../features/mark';
+import { markHTMLConverter } from '../features/mark/MarkHTMLConverter';
 
 const Posts: CollectionConfig = {
     slug: "posts",
@@ -18,10 +19,16 @@ const Posts: CollectionConfig = {
                 features: ({ defaultFeatures }) => {
                     return [
                         BoldTextFeature(),
+                        LinkFeature({}),
                         InlineCodeTextFeature(),
-                        HTMLConverterFeature({}),
+                        HTMLConverterFeature({converters({ defaultConverters }) {
+                            return [...defaultConverters, markHTMLConverter]
+                        },}),
                         TreeViewFeature(),
-                        MarkFeature()
+                        MarkFeature(),
+                        HeadingFeature({}),
+                        OrderedListFeature(),
+                        UnorderedListFeature()
                     ]
                 }
             })

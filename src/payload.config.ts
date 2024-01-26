@@ -6,16 +6,18 @@ import { webpackBundler } from '@payloadcms/bundler-webpack'
 import { slateEditor } from '@payloadcms/richtext-slate'
 import { MarkFeature } from './features/mark'
 import { viteBundler } from '@payloadcms/bundler-vite'
+import { ParagraphHTMLConverter, getEnabledNodes, sanitizeEditorConfig } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload/config'
 import { AlignFeature, BoldTextFeature, HTMLConverterFeature, HeadingFeature, IndentFeature, InlineCodeTextFeature, ItalicTextFeature, LinkFeature, StrikethroughTextFeature, SubscriptTextFeature, SuperscriptTextFeature, TreeViewFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import Users from './collections/Users'
 import Posts from './collections/Posts'
+import { markHTMLConverter } from './features/mark/MarkHTMLConverter'
 
 export default buildConfig({
   admin: {
     user: Users.slug,
-    bundler: viteBundler(),
+    bundler: webpackBundler(),
   },
   editor: lexicalEditor({
     features: (({ defaultFeatures }) => {
@@ -29,7 +31,7 @@ export default buildConfig({
         StrikethroughTextFeature(),
         MarkFeature(),
         HTMLConverterFeature(({converters({ defaultConverters }) {
-          return [...defaultConverters]
+          return [...defaultConverters, markHTMLConverter]
         },})),
         SubscriptTextFeature(),
         SuperscriptTextFeature(),

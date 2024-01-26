@@ -1,23 +1,25 @@
-import type { SerializedQuoteNode } from '@lexical/rich-text'
-import { $setBlocksType } from '@lexical/selection'
-import CustomMarkNode,{ $createCustomMarkNode, $isCustomMarkNode, INSERT_CUSTOMMARK_COMMAND, CustomMarkPlugin } from './CustomMark'
-import { $INTERNAL_isPointSelection, $getSelection, $isRangeSelection } from 'lexical'
-import type { HTMLConverter } from '@payloadcms/richtext-lexical'
-import type { FeatureProvider } from '@payloadcms/richtext-lexical'
-
-import { SlashMenuOption } from '@payloadcms/richtext-lexical'
+// import type { SerializedMarkNode } from '@lexical/mark'
+import { MarkNode, $isMarkNode } from '@lexical/mark'
+import { $isRangeSelection, $setSelection } from 'lexical'
+import type { FeatureProvider,  } from '@payloadcms/richtext-lexical'
+import { getSelectedNode } from '@payloadcms/richtext-lexical'
 import { SectionWithEntries } from '@payloadcms/richtext-lexical/dist/field/features/format/common/floatingSelectToolbarSection'
-import { convertLexicalNodesToHTML } from '@payloadcms/richtext-lexical'
-import { MARK } from './markdownTransformer'
+import { markHTMLConverter } from './MarkHTMLConverter'
+import { $findMatchingParent } from '@lexical/utils'
+import CustomMarkNode, { UNWRAP_MARK_SELECTION, WRAP_SELECTION_WITHIN_MARK_COMMAND } from './CustomMark'
 
 export const MarkFeature = (): FeatureProvider => {
   return {
     feature: () => {
       return {
-        plugins: [{ 
-          Component: async() => {
-            return CustomMarkPlugin;
-          }, position: 'bottom' }],
+        plugins: [{
+          Component: () => {
+            return import('./CustomMark').then(module => {
+              return module.CustomMarkPlugin;
+            })
+          },
+          position: 'normal'
+        }],
         floatingSelectToolbar: {
           sections: [
             SectionWithEntries([
@@ -25,64 +27,42 @@ export const MarkFeature = (): FeatureProvider => {
                 ChildComponent: () =>
                   import('./MarkIcon').then((module) => module.Markicon),
                 isActive: ({ selection }) => {
-                  return false
+                  if($isRangeSelection(selection)) {
+                    const selectedNode = getSelectedNode(selection)
+                    const linkParent = $findMatchingParent(selectedNode, $isMarkNode)
+                    return linkParent != null
+                  }
+                  return false;
                 },
-                key: 'mark',
+                key: 'customMark',
+                label: 'customMark',
                 onClick: ({ editor, isActive }) => {
-                  editor.dispatchCommand(INSERT_CUSTOMMARK_COMMAND, undefined);
+                  if(!isActive) {
+                    editor.dispatchCommand(WRAP_SELECTION_WITHIN_MARK_COMMAND, null)
+                  }
+                  else {
+                    editor.dispatchCommand(UNWRAP_MARK_SELECTION, null)
+                  }
                 },
-                order: 0,
+                order: 7,
               },
             ]),
           ],          
         },
-        
         nodes: [
           {
-            converters: {
-              html: {
-                converter: async ({ converters, node, parent }) => {
-                  const childrenText = await convertLexicalNodesToHTML({
-                    converters,
-                    lexicalNodes: node.children,
-                    parent: {
-                      ...node,
-                      parent,
-                    },
-                  })
-                  return `<mark>${childrenText}</mark>`
-                },
-                nodeTypes: [CustomMarkNode.getType()],
-              } as HTMLConverter<SerializedQuoteNode>,
-            },
+            converters: { html: markHTMLConverter},
             node: CustomMarkNode,
             type: CustomMarkNode.getType(),
+            // TODO: Add validation similar to upload for internal links and fields
           },
+          {
+            node: MarkNode,
+            type: MarkNode.getType()
+          }
         ],
+        // markdownTransformers: [INLINE_MARK],
         props: null,
-        slashMenu: {
-          options: [
-            {
-              displayName: 'Basic',
-              key: 'basic',
-              options: [
-                new SlashMenuOption(`mark`, {
-                  Icon: () =>
-                    import('./MarkIcon').then(
-                      (module) => module.Markicon,
-                    ),
-                  displayName: `Mark`,
-                  keywords: ['customMark'],
-                  onSelect: () => {
-                    const selection = $getSelection();
-                    if ($INTERNAL_isPointSelection(selection)) {
-                    }
-                  },
-                }),
-              ],
-            },
-          ],
-        },
       }
     },
     key: 'customMark',

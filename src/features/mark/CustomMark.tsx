@@ -90,12 +90,21 @@ export function $wrapSelectionInMarkNode(selection: RangeSelection, isBackward: 
             if(isBackward) {
                 if(node.__key === focusKey) {
                     focusKey = splitNodes[1].__key;
+                    if(node.__key === anchorKey) {
+                        anchorKey = focusKey;
+                        updatedAnchorOffset = splitNodes[1].getTextContentSize();
+                    }
+                    updatedFocusOffset = 0;
                 }
             }
             else {
                 if(node.__key === anchorKey) {
-                    updatedAnchorOffset = 0;
                     anchorKey = splitNodes[1].__key;
+                    if(node.__key === focusKey) {
+                        focusKey = anchorKey;
+                        updatedFocusOffset = splitNodes[1].getTextContentSize();
+                    }
+                    updatedAnchorOffset = 0;
                 }
             }
         }
@@ -170,7 +179,7 @@ export function $wrapSelectionInMarkNode(selection: RangeSelection, isBackward: 
         // eslint-disable-next-line no-unused-expressions
         isBackward ? lastCreatedMarkNode.selectStart() : lastCreatedMarkNode.selectEnd();
     }
-    return [anchorKey, focusKey];
+    return { anchorKey, focusKey, updatedAnchorOffset, updatedFocusOffset };
     // const rangeSelection = $createRangeSelection()
     // rangeSelection.insertNodes(selectionBuffer);
     // $setSelection(rangeSelection);
@@ -192,27 +201,15 @@ export function CustomMarkPlugin(): null {
             editor.registerCommand(WRAP_SELECTION_WITHIN_MARK_COMMAND, () => {
                 const selection = $getSelection();
                 if($isRangeSelection(selection)) {
-                    const anchorKey = selection.anchor.key;
-                    const anchorOffset = selection.anchor.offset;
-                    const focusKey = selection.focus.key;
-                    const focusOffset = selection.focus.offset;
-                    const selectionKeys = $wrapSelectionInMarkNode(selection, selection.isBackward(), 'mark-node');
+                    const { anchorKey, focusKey, updatedAnchorOffset, updatedFocusOffset } = $wrapSelectionInMarkNode(selection, selection.isBackward(), 'mark-node');
                     editor.update(() => {
                         const selection = $getSelection();
-                        // if($isRangeSelection(selection)) {
-                        //     if(selection.isBackward()) {
-                        //         selection.focus.key = selectionKeys[1];
-                        //         selection.focus.offset = focusOffset;
-                        //         selection.anchor.offset = anchorOffset;
-                        //         selection.anchor.key = anchorKey;
-                        //     }
-                        //     else {
-                        //         selection.focus.key = focusKey;
-                        //         selection.focus.offset = focusOffset;
-                        //         selection.anchor.offset = anchorOffset;
-                        //         selection.anchor.key = selectionKeys[0];
-                        //     }
-                        // }
+                        if($isRangeSelection(selection)) {
+                            selection.focus.key = focusKey;
+                            selection.focus.offset = updatedFocusOffset;
+                            selection.anchor.offset = updatedAnchorOffset;
+                            selection.anchor.key = anchorKey;
+                        }
                         $setSelection(selection);
                     })
                 }

@@ -30,9 +30,9 @@ export default buildConfig({
         ItalicTextFeature(),
         StrikethroughTextFeature(),
         MarkFeature(),
-        HTMLConverterFeature(({converters({ defaultConverters }) {
-          return [...defaultConverters, markHTMLConverter]
-        },})),
+        // HTMLConverterFeature(({converters({ defaultConverters }) {
+        //   return [...defaultConverters, markHTMLConverter]
+        // },})),
         SubscriptTextFeature(),
         SuperscriptTextFeature(),
         InlineCodeTextFeature(),

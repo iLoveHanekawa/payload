@@ -18,17 +18,13 @@ const Posts: CollectionConfig = {
             editor: lexicalEditor({
                 features: ({ defaultFeatures }) => {
                     return [
-                        BoldTextFeature(),
-                        LinkFeature({}),
-                        InlineCodeTextFeature(),
+                        ...defaultFeatures,
+                        MarkFeature(),
                         HTMLConverterFeature({converters({ defaultConverters }) {
                             return [...defaultConverters, markHTMLConverter]
                         },}),
                         TreeViewFeature(),
-                        MarkFeature(),
-                        HeadingFeature({}),
-                        OrderedListFeature(),
-                        UnorderedListFeature()
+                        
                     ]
                 }
             })

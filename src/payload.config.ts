@@ -36,7 +36,6 @@ export default buildConfig({
         SubscriptTextFeature(),
         SuperscriptTextFeature(),
         InlineCodeTextFeature(),
-        LinkFeature({})
       ]
     })
   }),

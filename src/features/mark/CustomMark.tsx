@@ -1,13 +1,11 @@
 'use client'
 
-import type { NodeKey, LexicalNode, LexicalEditor } from "lexical";
-import { createCommand, $getNodeByKey, $isLineBreakNode, COMMAND_PRIORITY_LOW, $isElementNode, $getSelection, $createRangeSelection, $isRangeSelection, RangeSelection, $isTextNode, $applyNodeReplacement, TextNode, $setSelection } from "lexical";
-import { ELEMENT_TYPE_TO_FORMAT } from "@payloadcms/richtext-lexical";
+import type { NodeKey, LexicalNode, RangeSelection } from "lexical";
+import { createCommand, COMMAND_PRIORITY_LOW, $isElementNode, $getSelection, $isRangeSelection, $isTextNode, $applyNodeReplacement, $setSelection } from "lexical";
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { MarkNode, SerializedMarkNode, $unwrapMarkNode, $isMarkNode, $createMarkNode } from "@lexical/mark";
-import { SerializedLinkNode } from "@payloadcms/richtext-lexical";
-import { mergeRegister, registerNestedElementResolver } from '@lexical/utils'
-import { useEffect, useState } from "react";
+import { mergeRegister } from '@lexical/utils'
+import { useEffect } from "react";
 
 export default class CustomMarkNode extends MarkNode {
 
@@ -27,7 +25,7 @@ export default class CustomMarkNode extends MarkNode {
         return 'customMark'
     }
 
-    static importJSON(serializedNode) {
+    static importJSON(serializedNode: SerializedMarkNode) {
         const node = $createCustomMarkNode(serializedNode.ids);
         node.setFormat(serializedNode.format);
         node.setIndent(serializedNode.indent);
@@ -144,10 +142,7 @@ export function $wrapSelectionInMarkNode(selection: RangeSelection, isBackward: 
           // If we don't have a created mark node, we can make one
           const createMarkNode = createNode || $createMarkNode;
           lastCreatedMarkNode = createMarkNode([id]);
-          console.log({ tnkeyBefore: targetNode.__key, tc: targetNode.getTextContent() })
           targetNode.insertBefore(lastCreatedMarkNode);
-          console.log({ tnkeyAfter: targetNode.__key})
-
         }
   
         // Add the target node to be wrapped in the latest created mark node
@@ -159,19 +154,6 @@ export function $wrapSelectionInMarkNode(selection: RangeSelection, isBackward: 
         currentNodeParent = undefined;
         lastCreatedMarkNode = undefined;
       }
-    }
-
-    const debug = $getSelection();
-    if($isRangeSelection(debug)){ 
-        console.log({
-            updatedAnchor: anchorKey,
-            updatedFocus: focusKey,
-            anchorKey: debug.anchor.key,
-            anchorOffset: debug.anchor.offset,
-            focusKey: debug.focus.key,
-            focusOffset: debug.focus.offset,
-            nodes: debug.getNodes()
-        })
     }
 
     // Make selection collapsed at the end
@@ -220,7 +202,6 @@ export function CustomMarkPlugin(): null {
                 const selection = $getSelection();
                 if($isRangeSelection(selection)) {
                     const nodes = selection.getNodes();
-                    console.log({ unmarking: nodes })
                     for(let i = 0; i < nodes.length; i++) {
                         const node = nodes[i];
                         const parent = node.getParent();

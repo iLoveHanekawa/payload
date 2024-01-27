@@ -1,7 +1,7 @@
 // import type { SerializedMarkNode } from '@lexical/mark'
 import { MarkNode, $isMarkNode } from '@lexical/mark'
-import { $isRangeSelection, $setSelection } from 'lexical'
-import type { FeatureProvider,  } from '@payloadcms/richtext-lexical'
+import { $isRangeSelection, $isLeafNode, $isTextNode, $isElementNode } from 'lexical'
+import type { FeatureProvider } from '@payloadcms/richtext-lexical'
 import { getSelectedNode } from '@payloadcms/richtext-lexical'
 import { SectionWithEntries } from '@payloadcms/richtext-lexical/dist/field/features/format/common/floatingSelectToolbarSection'
 import { markHTMLConverter } from './MarkHTMLConverter'
@@ -27,12 +27,22 @@ export const MarkFeature = (): FeatureProvider => {
                 ChildComponent: () =>
                   import('./MarkIcon').then((module) => module.Markicon),
                 isActive: ({ selection }) => {
+                  let active = true;
                   if($isRangeSelection(selection)) {
-                    const selectedNode = getSelectedNode(selection)
-                    const linkParent = $findMatchingParent(selectedNode, $isMarkNode)
-                    return linkParent != null
+                    const nodes = selection.getNodes();
+                    const len = nodes.length;
+                    for(let i = 0; i < len; i++) {
+                      const node = nodes[i];
+                      if($isMarkNode(node)) continue;
+                      if($isTextNode(node) || ($isElementNode(node) && node.isInline())) {
+                        const parent = node.getParent();
+                        if(!$isMarkNode(parent)) {
+                          active = false;
+                        }
+                      }
+                    }
                   }
-                  return false;
+                  return active;
                 },
                 key: 'customMark',
                 label: 'customMark',

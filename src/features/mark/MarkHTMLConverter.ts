@@ -1,5 +1,4 @@
 import { convertLexicalNodesToHTML } from '@payloadcms/richtext-lexical'
-import { TextNode } from 'lexical';
 import { MarkNode } from '@lexical/mark'
 import type { HTMLConverter } from '@payloadcms/richtext-lexical'
 import type { SerializedMarkNode } from '@lexical/mark'

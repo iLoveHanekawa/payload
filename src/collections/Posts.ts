@@ -2,6 +2,7 @@ import { BoldTextFeature, HTMLConverterFeature, HeadingFeature, InlineCodeTextFe
 import { CollectionConfig } from 'payload/types'
 import { MarkFeature } from '../features/mark';
 import { markHTMLConverter } from '../features/mark/MarkHTMLConverter';
+import { CustomSuperscriptFeature } from '../features/superscript';
 
 const Posts: CollectionConfig = {
     slug: "posts",
@@ -18,7 +19,14 @@ const Posts: CollectionConfig = {
             editor: lexicalEditor({
                 features: ({ defaultFeatures }) => {
                     return [
-                        ...defaultFeatures,
+                        // ...defaultFeatures,
+                        CustomSuperscriptFeature(),
+                        LinkFeature({
+                            fields: [{
+                                name: 'Random',
+                                type: 'richText'
+                            }]
+                        }),
                         MarkFeature(),
                         HTMLConverterFeature({converters({ defaultConverters }) {
                             return [...defaultConverters, markHTMLConverter]

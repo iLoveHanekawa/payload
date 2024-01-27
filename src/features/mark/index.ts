@@ -13,7 +13,7 @@ export const MarkFeature = (): FeatureProvider => {
     feature: () => {
       return {
         plugins: [{
-          Component: () => {
+          Component: async () => {
             return import('./CustomMark').then(module => {
               return module.CustomMarkPlugin;
             })
@@ -26,7 +26,7 @@ export const MarkFeature = (): FeatureProvider => {
               {
                 ChildComponent: () =>
                   import('./MarkIcon').then((module) => module.Markicon),
-                isActive: ({ selection }) => {
+                isActive: ({ selection, editor }) => {
                   let active = true;
                   if($isRangeSelection(selection)) {
                     const nodes = selection.getNodes();

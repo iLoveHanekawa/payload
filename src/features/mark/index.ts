@@ -54,7 +54,7 @@ export const MarkFeature = (): FeatureProvider => {
                     editor.dispatchCommand(UNWRAP_MARK_SELECTION, null)
                   }
                 },
-                order: 6,
+                order: 5,
               },
             ]),
           ],          

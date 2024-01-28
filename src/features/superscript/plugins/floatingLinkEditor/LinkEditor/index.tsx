@@ -86,7 +86,7 @@ export function LinkEditor({
 
   const drawerSlug = formatDrawerSlug({
     depth: editDepth,
-    slug: `lexical-rich-text-link-` + uuid,
+    slug: `lexical-rich-text-custom-superscript-link-` + uuid,
   })
 
   const updateLinkEditor = useCallback(async () => {

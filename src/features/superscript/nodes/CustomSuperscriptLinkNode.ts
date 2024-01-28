@@ -1,5 +1,5 @@
 import type { BaseSelection } from 'lexical'
-
+import { $createTextNode } from 'lexical'
 import { addClassNamesToElement, isHTMLAnchorElement } from '@lexical/utils'
 import { type LinkPayload } from '@payloadcms/richtext-lexical/dist/field/features/Link/plugins/floatingLinkEditor/types';
 
@@ -266,99 +266,122 @@ export const TOGGLE_CUSTOM_SUPERSCRIPT_LINK_COMMAND: LexicalCommand<CustomSupers
 
 export function toggleCustomSuperscriptLink(payload: LinkPayload): void {
   const selection = $getSelection()
-
-  if (!$isRangeSelection(selection)) {
-    return
-  }
-  const nodes = selection.getNodes();
-  console.log({ selectionInsideToggle: selection.getNodes() })
-  if (nodes.length === 1) {
-    console.log('1 link');
-    const firstNode = nodes[0]
-    // if the first node is a LinkNode or if its
-    // parent is a LinkNode, we update the URL, target and rel.
-    const linkNode: CustomSuperscriptLinkNode | null = $isCustomSuperscriptLinkNode(firstNode)
-      ? firstNode
-      : $getCustomSuperscriptLinkAncestor(firstNode)
-    console.log({ isLinkNode: $isCustomSuperscriptLinkNode(linkNode)})
-    if (linkNode !== null) {
-      linkNode.setFields(payload.fields)
-      console.log({ isLinkNodeNull: linkNode })
-      console.log({ payloadText: payload.text, linkNodeText: linkNode.getTextContent()})
-      if (payload.text != null && payload.text !== linkNode.getTextContent()) {
-        // remove all children and add child with new textcontent:
-        console.log('payload text is set but node and payload dont match');
-        linkNode.append($createImmutableTextNode(payload.text))
-        linkNode.getChildren().forEach((child) => {
-          if (child !== linkNode.getLastChild()) {
-            child.remove()
-          }
-        })
-      }
-      return
-    }
-  }
-
-  let prevParent: ElementNode | CustomSuperscriptLinkNode | null = null
-  let linkNode: CustomSuperscriptLinkNode | null = null
-
-  nodes.forEach((node) => {
-    const parent = node.getParent()
-
-    if (parent === linkNode || parent === null || ($isElementNode(node) && !node.isInline())) {
-      return
-    }
-
-    if ($isCustomSuperscriptLinkNode(parent)) {
-      linkNode = parent
-      parent.setFields(payload.fields)
-      if (payload.text != null && payload.text !== parent.getTextContent()) {
-        // remove all children and add child with new textcontent:
-        parent.append($createImmutableTextNode(payload.text))
-        parent.getChildren().forEach((child) => {
-          if (child !== parent.getLastChild()) {
-            child.remove()
-          }
-        })
-      }
-      return
-    }
-
-    if (!parent.is(prevParent)) {
-      prevParent = parent
-      linkNode = $createCustomSuperscriptLinkNode({ fields: payload.fields })
+  
+  if (payload === null) {
+    const nodes = selection.extract()
+    // Remove LinkNodes
+    nodes.forEach((node) => {
+      const parent = node.getParent()
 
       if ($isCustomSuperscriptLinkNode(parent)) {
-        if (node.getPreviousSibling() === null) {
-          parent.insertBefore(linkNode)
-        } else {
-          parent.insertAfter(linkNode)
-        }
-      } else {
-        node.insertBefore(linkNode)
-      }
-    }
+        // const children = parent.getChildren()
 
-    if ($isCustomSuperscriptLinkNode(node)) {
-      if (node.is(linkNode)) {
-        return
-      }
-      if (linkNode !== null) {
-        const children = node.getChildren()
+        // for (let i = 0; i < children.length; i += 1) {
+        //   parent.insertBefore(children[i])
+        // }
 
-        for (let i = 0; i < children.length; i += 1) {
-          linkNode.append(children[i])
-        }
+        parent.remove()
       }
-
-      node.remove()
+    })
+  } else { 
+    if (!$isRangeSelection(selection)) {
       return
     }
-
-    if (linkNode !== null) {
-      linkNode.append(node)
+    const nodes = selection.getNodes();
+    console.log({ selectionInsideToggle: selection.getNodes() })
+    if (nodes.length === 1) {
+      console.log('1 link');
+      const firstNode = nodes[0]
+      // if the first node is a LinkNode or if its
+      // parent is a LinkNode, we update the URL, target and rel.
+      const linkNode: CustomSuperscriptLinkNode | null = $isCustomSuperscriptLinkNode(firstNode)
+        ? firstNode
+        : $getCustomSuperscriptLinkAncestor(firstNode)
+      console.log({ isLinkNode: $isCustomSuperscriptLinkNode(linkNode)})
+      if (linkNode !== null) {
+        linkNode.setFields(payload.fields)
+        console.log({ isLinkNodeNull: linkNode })
+        console.log({ payloadText: payload.text, linkNodeText: linkNode.getTextContent()})
+        if (payload.text != null && payload.text !== linkNode.getTextContent()) {
+          // remove all children and add child with new textcontent:
+          console.log('payload text is set but node and payload dont match');
+          linkNode.append($createImmutableTextNode(payload.text))
+          linkNode.getChildren().forEach((child) => {
+            if (child !== linkNode.getLastChild()) {
+              child.remove()
+            }
+          })
+        }
+        return
+      }
     }
-  })
+  
+    let prevParent: ElementNode | CustomSuperscriptLinkNode | null = null
+    let linkNode: CustomSuperscriptLinkNode | null = null
+  
+    nodes.forEach((node) => {
+      const parent = node.getParent()
+  
+      if (parent === linkNode || parent === null || ($isElementNode(node) && !node.isInline())) {
+        return
+      }
+  
+      if ($isCustomSuperscriptLinkNode(parent)) {
+        linkNode = parent
+        parent.setFields(payload.fields)
+        if (payload.text != null && payload.text !== parent.getTextContent()) {
+          // remove all children and add child with new textcontent:
+          parent.append($createImmutableTextNode(payload.text))
+          parent.getChildren().forEach((child) => {
+            if (child !== parent.getLastChild()) {
+              child.remove()
+            }
+          })
+        }
+        return
+      }
+  
+      if (!parent.is(prevParent)) {
+        prevParent = parent
+        linkNode = $createCustomSuperscriptLinkNode({ fields: payload.fields })
+  
+        if ($isCustomSuperscriptLinkNode(parent)) {
+          if (node.getPreviousSibling() === null) {
+            parent.insertBefore(linkNode)
+          } else {
+            parent.insertAfter(linkNode)
+          }
+        } else {
+          node.insertBefore(linkNode)
+        }
+      }
+  
+      if ($isCustomSuperscriptLinkNode(node)) {
+        if (node.is(linkNode)) {
+          return
+        }
+        if (linkNode !== null) {
+          const children = node.getChildren()
+  
+          for (let i = 0; i < children.length; i += 1) {
+            linkNode.append(children[i])
+          }
+        }
+  
+        node.remove()
+        return
+      }
+  
+      if (linkNode !== null) {
+        linkNode.append(node)
+        const nextSibling = linkNode.getNextSibling()
+        if(nextSibling === null) {
+          const hackTextNode = $createTextNode(' ');
+          linkNode.insertAfter(hackTextNode);
+        }
+      }
+    })
+  }
 }
 
 export function $getCustomSuperscriptLinkAncestor(node: LexicalNode): CustomSuperscriptLinkNode | null {

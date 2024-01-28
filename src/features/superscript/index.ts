@@ -1,17 +1,12 @@
 import { AutoLinkNode, FeatureProvider, LinkNode } from "@payloadcms/richtext-lexical";
 import { SectionWithEntries } from "@payloadcms/richtext-lexical/dist/field/features/format/common/floatingSelectToolbarSection";
 import ImmutableTextNode from "./CustomSuperscript";
-import { TOGGLE_LINK_WITH_MODAL_COMMAND } from '@payloadcms/richtext-lexical/dist/field/features/Link/plugins/floatingLinkEditor/LinkEditor/commands'
-import { AutoLinkPlugin } from "@payloadcms/richtext-lexical/dist/field/features/Link/plugins/autoLink"
-import { ClickableLinkPlugin } from '@payloadcms/richtext-lexical/dist/field/features/Link/plugins/clickableLink'
-import { FloatingLinkEditorPlugin } from '@payloadcms/richtext-lexical/dist/field/features/Link/plugins/floatingLinkEditor'
-import { LinkPlugin } from '@payloadcms/richtext-lexical/dist/field/features/Link/plugins/link'
 import { LinkFeatureProps } from "@payloadcms/richtext-lexical";
-import { PUSH_CUSTOM_SUPERSCRIPT_NODE } from "./CustomSuperscript";
+import { PUSH_CUSTOM_SUPERSCRIPT_NODE, RESOLVE_CUSTOM_SUPERSCRIPT_NODE_COUNT } from "./CustomSuperscript";
 import { LinkPayload } from '@payloadcms/richtext-lexical/dist/field/features/Link/plugins/floatingLinkEditor/types';
 import { CustomSuperscriptLinkNode, TOGGLE_CUSTOM_SUPERSCRIPT_LINK_COMMAND } from "./nodes/CustomSuperscriptLinkNode";
 import { TOGGLE_CUSTOM_SUPERSCRIPT_LINK_WITH_MODAL_COMMAND } from "./plugins/floatingLinkEditor/LinkEditor/commands";
-import { $getSelection } from 'lexical'
+import { $getSelection, KEY_BACKSPACE_COMMAND } from 'lexical'
 import { CustomSuperscriptHTMLConverter } from "./CustomSuperscriptHTMLConverter";
 import { CustomSuperscriptHTMLLinkConverter } from "./CustomSuperscriptHTMLLinkConverter";
 
@@ -74,14 +69,6 @@ export const CustomSuperscriptFeature = (): FeatureProvider => {
                                 label: 'customSuperscript',
                                 onClick: ({ editor, isActive }) => {
                                     editor.dispatchCommand(PUSH_CUSTOM_SUPERSCRIPT_NODE, null);
-                                    
-                                    // editor.dispatchCommand(TOGGLE_CUSTOM_SUPERSCRIPT_LINK_WITH_MODAL_COMMAND, payload);
-
-                                    if(!isActive) {
-                                    }
-                                    else {
-
-                                    }
                                 },
                                 order: 1
                             }

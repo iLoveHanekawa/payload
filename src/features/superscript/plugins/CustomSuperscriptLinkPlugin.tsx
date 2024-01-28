@@ -7,6 +7,7 @@ import {
   $isRangeSelection,
   COMMAND_PRIORITY_LOW,
   PASTE_COMMAND,
+  FORMAT_TEXT_COMMAND,
 } from 'lexical'
 import { useEffect } from 'react'
 
@@ -14,6 +15,7 @@ import { CustomSuperscriptLinkPayload } from '../nodes/CustomSuperscriptLinkNode
 import { validateUrl } from '../utils/url'
 import { type CustomSuperscriptLinkFields, CustomSuperscriptLinkNode, TOGGLE_CUSTOM_SUPERSCRIPT_LINK_COMMAND } from '../nodes/CustomSuperscriptLinkNode'
 import { toggleCustomSuperscriptLink } from '../nodes/CustomSuperscriptLinkNode'
+import { RESOLVE_CUSTOM_SUPERSCRIPT_NODE_COUNT } from '../CustomSuperscript'
 
 export function CustomSuperscriptLinkPlugin(): null {
   const [editor] = useLexicalComposerContext()
@@ -32,9 +34,12 @@ export function CustomSuperscriptLinkPlugin(): null {
               return false
             }
           }
-
+          if(payload === null) {
+            editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'superscript');
+          }
           toggleCustomSuperscriptLink(payload)
-          return true
+          editor.dispatchCommand(RESOLVE_CUSTOM_SUPERSCRIPT_NODE_COUNT, null);
+          return false
         },
         COMMAND_PRIORITY_LOW,
       ),

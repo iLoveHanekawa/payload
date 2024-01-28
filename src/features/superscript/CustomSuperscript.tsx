@@ -3,9 +3,9 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from '@payloadcms/richtext-lexical/dist/field/features/Link/plugins/floatingLinkEditor/LinkEditor/commands'
 import { LinkNode, SerializedLinkNode, TOGGLE_LINK_COMMAND, type LinkFields, $createLinkNode } from "@payloadcms/richtext-lexical";
-import { EditorConfig, createCommand, COMMAND_PRIORITY_LOW, SerializedTextNode, LexicalEditor } from "lexical";
+import { EditorConfig, createCommand, COMMAND_PRIORITY_LOW, SerializedTextNode, LexicalEditor, KEY_BACKSPACE_COMMAND as PARENT_KEY_BACKSPACE } from "lexical";
 import { mergeRegister } from '@lexical/utils'
-import { $getSelection, $createTextNode, $isRangeSelection, TextNode, FORMAT_TEXT_COMMAND, $applyNodeReplacement, type LexicalNode } from 'lexical'
+import { $getSelection, $nodesOfType, $createTextNode, $isRangeSelection, TextNode, FORMAT_TEXT_COMMAND, $applyNodeReplacement, type LexicalNode } from 'lexical'
 import { useEffect } from 'react';
 import { $getCustomSuperscriptLinkAncestor } from './nodes/CustomSuperscriptLinkNode';
 import { LinkPayload } from '@payloadcms/richtext-lexical/dist/field/features/Link/plugins/floatingLinkEditor/types';
@@ -67,6 +67,8 @@ export const $createImmutableTextNode = (__text: string, __key?: string): Immuta
 
 export const PUSH_CUSTOM_SUPERSCRIPT_NODE = createCommand('pushCustomSuperscriptNode');
 export const RESOLVE_CUSTOM_SUPERSCRIPT_NODE_COUNT = createCommand('resolveCustomSuperscriptNodeCount');
+export const KEY_BACKSPACE_COMMAND = createCommand('customKeyBackspace');
+
 
 export function ImmutableTextNodePlugin(): null {
     const [editor] = useLexicalComposerContext();
@@ -93,6 +95,7 @@ export function ImmutableTextNodePlugin(): null {
                     const nodesArrLen = nodes.length;
                     console.log(keyArray);
                     const newImmutableNode = $createImmutableTextNode('1');
+
                     if(len > 1) {
                         console.log('case of multi nodes');
                         const targetNode = nodes[nodesArrLen - 1];
@@ -132,10 +135,28 @@ export function ImmutableTextNodePlugin(): null {
                         },
                         text
                     }
+                    
                     editor.dispatchCommand(TOGGLE_CUSTOM_SUPERSCRIPT_LINK_WITH_MODAL_COMMAND, payload);
                     editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'superscript');
                 }
                 return false;
+            }, COMMAND_PRIORITY_LOW),
+            // try to optimize this because it looks performance taxing
+            editor.registerCommand(RESOLVE_CUSTOM_SUPERSCRIPT_NODE_COUNT, () => {
+                editor.update(() => {
+                    const immutableTextNodes = $nodesOfType(ImmutableTextNode);
+                    let number = 1;
+                    immutableTextNodes.forEach(node => {
+                        node.setTextContent(number.toString());
+                        number += 1;
+                    })
+                });
+                return false;
+            }, COMMAND_PRIORITY_LOW),
+
+            editor.registerCommand(KEY_BACKSPACE_COMMAND, (event) => {
+                console.log(event);
+                return true;
             }, COMMAND_PRIORITY_LOW)
         );
     }, [editor])

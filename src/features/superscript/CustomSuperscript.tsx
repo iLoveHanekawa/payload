@@ -91,16 +91,12 @@ export function ImmutableTextNodePlugin(): null {
                     }
                     const isBackward = selection.isBackward();
                     const nodes = selection.getNodes();
-                    console.log({keyArray, maxKey, nodes});
                     const nodesArrLen = nodes.length;
-                    console.log(keyArray);
                     const newImmutableNode = $createImmutableTextNode('1');
 
                     if(len > 1) {
-                        console.log('case of multi nodes');
                         const targetNode = nodes[nodesArrLen - 1];
                         const linkAncestor = $getCustomSuperscriptLinkAncestor(targetNode);
-                        console.log(linkAncestor);
                         if(!linkAncestor) {
                             targetNode.insertAfter(newImmutableNode);
                         }
@@ -118,14 +114,11 @@ export function ImmutableTextNodePlugin(): null {
                             linkAncestor.insertAfter(newImmutableNode);
                         }
                     }
-                    console.log(newImmutableNode.__key);
                     selection.anchor.key =  newImmutableNode.__key;
                     selection.focus.key = newImmutableNode.__key;
                     selection.anchor.offset = isBackward? newImmutableNode.getTextContentSize(): 0;
                     selection.focus.offset = isBackward? 0: newImmutableNode.getTextContentSize();
-                    console.log({ afterUpdate: $getSelection().getNodes()})
                     const text = $getSelection().getTextContent();
-                    console.log({ text })
                     const payload: LinkPayload = {
                         fields: {
                             doc: null,
@@ -151,11 +144,10 @@ export function ImmutableTextNodePlugin(): null {
                         number += 1;
                         const parent = node.getParent();
                         if($isCustomSuperscriptLinkNode(parent)) {
+                            const oldFields = parent.getFields();
                             parent.setFields({
+                                ...oldFields,
                                 url: `#footer-${number - 1}`,
-                                doc: null,
-                                linkType: 'custom',
-                                newTab: false
                             })
                         }
                     })
@@ -165,7 +157,6 @@ export function ImmutableTextNodePlugin(): null {
             }, COMMAND_PRIORITY_LOW),
 
             editor.registerCommand(KEY_BACKSPACE_COMMAND, (event) => {
-                console.log(event);
                 return true;
             }, COMMAND_PRIORITY_LOW)
         );

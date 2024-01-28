@@ -1,4 +1,4 @@
-import { AutoLinkNode, FeatureProvider, LinkNode } from "@payloadcms/richtext-lexical";
+import { AutoLinkNode, BoldTextFeature, FeatureProvider, ItalicTextFeature, LinkFeature, LinkNode, ParagraphFeature, StrikethroughTextFeature, lexicalEditor } from "@payloadcms/richtext-lexical";
 import { SectionWithEntries } from "@payloadcms/richtext-lexical/dist/field/features/format/common/floatingSelectToolbarSection";
 import ImmutableTextNode from "./CustomSuperscript";
 import { LinkFeatureProps } from "@payloadcms/richtext-lexical";
@@ -7,16 +7,33 @@ import { LinkPayload } from '@payloadcms/richtext-lexical/dist/field/features/Li
 import { CustomSuperscriptLinkNode, TOGGLE_CUSTOM_SUPERSCRIPT_LINK_COMMAND } from "./nodes/CustomSuperscriptLinkNode";
 import { TOGGLE_CUSTOM_SUPERSCRIPT_LINK_WITH_MODAL_COMMAND } from "./plugins/floatingLinkEditor/LinkEditor/commands";
 import { $getSelection, KEY_BACKSPACE_COMMAND } from 'lexical'
+import { customSuperscriptLinkPopulationPromiseHOC } from "./populationPromise";
 import { CustomSuperscriptHTMLConverter } from "./CustomSuperscriptHTMLConverter";
 import { CustomSuperscriptHTMLLinkConverter } from "./CustomSuperscriptHTMLLinkConverter";
 
 
 export const CustomSuperscriptFeature = (): FeatureProvider => {
     const customSuperscriptFeatureEditorFields: LinkFeatureProps = {
-        fields: [{
-            type: 'richText',
-            name: 'Content'
-        }]
+        fields: [
+            {
+                name: 'nested-lexical-text-content',
+                label: 'Content',
+                required: true,
+                type: 'richText',
+                editor: lexicalEditor({
+                    features: ({ defaultFeatures }) => {
+                        return [
+                            // ...defaultFeatures,
+                            ParagraphFeature(),
+                            ItalicTextFeature(),
+                            BoldTextFeature(),
+                            StrikethroughTextFeature(),
+                            LinkFeature({}),
+                        ]
+                    }
+                })
+            }
+        ]
     }
     return {
         feature: () => {
@@ -88,7 +105,8 @@ export const CustomSuperscriptFeature = (): FeatureProvider => {
                             html: CustomSuperscriptHTMLLinkConverter
                         },
                         node: CustomSuperscriptLinkNode,
-                        type: CustomSuperscriptLinkNode.getType()
+                        type: CustomSuperscriptLinkNode.getType(),
+                        populationPromises: [customSuperscriptLinkPopulationPromiseHOC(customSuperscriptFeatureEditorFields)]
                     }
                 ],
                 props: null

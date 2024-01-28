@@ -1,6 +1,7 @@
 import { Drawer } from 'payload/components/elements'
 import { Form } from 'payload/components/forms'
-import { RenderFields } from 'payload/components/forms'
+import { RenderFields } from '../components/RenderFields'
+// import { RenderFields } from 'payload/components/forms'
 import { FormSubmit } from 'payload/components/forms'
 import { fieldTypes } from 'payload/components/forms'
 import React from 'react'

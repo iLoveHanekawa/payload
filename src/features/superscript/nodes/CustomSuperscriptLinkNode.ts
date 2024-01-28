@@ -128,7 +128,6 @@ export class CustomSuperscriptLinkNode extends ElementNode {
       // no need to sanitize url that we add ourselves
       // element.href = this.__fields.url;
       // console.log({url: this.__fields.url});
-      console.log('this gets called')
       element.href = this.sanitizeUrl(this.__fields.url ?? '')
     }
     if (this.__fields?.newTab ?? false) {
@@ -204,6 +203,8 @@ export class CustomSuperscriptLinkNode extends ElementNode {
 
   setFields(fields: CustomSuperscriptLinkFields): void {
     const writable = this.getWritable()
+    console.log({ writable });
+    console.log({ setFieldsFields: fields});
     writable.__fields = fields
   }
 
@@ -271,7 +272,14 @@ export const TOGGLE_CUSTOM_SUPERSCRIPT_LINK_COMMAND: LexicalCommand<CustomSupers
 export function toggleCustomSuperscriptLink(payload: LinkPayload): void {
   const selection = $getSelection()
   
+  console.log({ payload, selection });
+
+  if(!$isRangeSelection(selection)) {
+    return;
+  }
+
   if (payload === null) {
+    console.log('in null');
     const nodes = selection.extract()
     // Remove LinkNodes
     nodes.forEach((node) => {
@@ -288,27 +296,26 @@ export function toggleCustomSuperscriptLink(payload: LinkPayload): void {
       }
     })
   } else { 
-    if (!$isRangeSelection(selection)) {
-      return
-    }
+    // if (!$isRangeSelection(selection)) {
+    //   return
+    // }
+    console.log('in else');
     const nodes = selection.getNodes();
-    console.log({ selectionInsideToggle: selection.getNodes() })
     if (nodes.length === 1) {
-      console.log('1 link');
+      console.log('one node');
       const firstNode = nodes[0]
       // if the first node is a LinkNode or if its
       // parent is a LinkNode, we update the URL, target and rel.
       const linkNode: CustomSuperscriptLinkNode | null = $isCustomSuperscriptLinkNode(firstNode)
         ? firstNode
         : $getCustomSuperscriptLinkAncestor(firstNode)
-      console.log({ isLinkNode: $isCustomSuperscriptLinkNode(linkNode)})
       if (linkNode !== null) {
+        console.log('target area');
+        console.log({ linkNodeBefore: linkNode })
         linkNode.setFields(payload.fields)
-        console.log({ isLinkNodeNull: linkNode })
-        console.log({ payloadText: payload.text, linkNodeText: linkNode.getTextContent()})
+        console.log({ linkNodeAfter: linkNode })
         if (payload.text != null && payload.text !== linkNode.getTextContent()) {
           // remove all children and add child with new textcontent:
-          console.log('payload text is set but node and payload dont match');
           linkNode.append($createImmutableTextNode(payload.text))
           linkNode.getChildren().forEach((child) => {
             if (child !== linkNode.getLastChild()) {

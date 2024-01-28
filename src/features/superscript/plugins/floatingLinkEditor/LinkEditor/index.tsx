@@ -78,7 +78,6 @@ export function LinkEditor({
 
     return fields
   })
-  console.log(fieldSchema);
 
 
   const { closeModal, toggleModal } = useModal()
@@ -321,6 +320,7 @@ export function LinkEditor({
         drawerSlug={drawerSlug}
         fieldSchema={fieldSchema}
         handleModalSubmit={(fields: Fields, data: Data) => {
+          console.log({data});
           closeModal(drawerSlug)
 
           const newLinkPayload: CustomSuperscriptLinkPayload = data as CustomSuperscriptLinkPayload

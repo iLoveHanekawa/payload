@@ -49,7 +49,7 @@ export type CustomSuperscriptSerializedLinkNode = Spread<
   SerializedElementNode
 >
 
-const SUPPORTED_URL_PROTOCOLS = new Set(['http:', 'https:', 'mailto:', 'sms:', 'tel:'])
+const SUPPORTED_URL_PROTOCOLS = new Set(['http:', 'https:', 'mailto:', 'sms:', 'tel:', '#'])
 
 /** @noInheritDoc */
 export class CustomSuperscriptLinkNode extends ElementNode {
@@ -125,6 +125,10 @@ export class CustomSuperscriptLinkNode extends ElementNode {
   createDOM(config: EditorConfig): HTMLAnchorElement {
     const element = document.createElement('a')
     if (this.__fields?.linkType === 'custom') {
+      // no need to sanitize url that we add ourselves
+      // element.href = this.__fields.url;
+      // console.log({url: this.__fields.url});
+      console.log('this gets called')
       element.href = this.sanitizeUrl(this.__fields.url ?? '')
     }
     if (this.__fields?.newTab ?? false) {

@@ -5,6 +5,7 @@ import type { Field, RadioField, TextField } from 'payload/types'
 import { extractTranslations } from 'payload/utilities'
 
 import { validateUrl } from '../utils/url'
+import { BoldTextFeature, ItalicTextFeature, LinkFeature, ParagraphFeature, StrikethroughTextFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
 const translations = extractTranslations([
   'fields:textToDisplay',
@@ -47,93 +48,64 @@ export const getBaseFields = (
 
   const baseFields = [
     {
-      name: 'text',
-      label: translations['fields:textToDisplay'],
+      name: 'nested-lexical-text-content',
+      label: 'Content',
       required: true,
-      type: 'text',
-    },
-    {
-      name: 'fields',
-      admin: {
-        style: {
-          borderBottom: 0,
-          borderTop: 0,
-          margin: 0,
-          padding: 0,
-        },
-      },
-      fields: [
-        {
-          name: 'linkType',
-          admin: {
-            description: translations['fields:chooseBetweenCustomTextOrDocument'],
-          },
-          defaultValue: 'custom',
-          label: translations['fields:linkType'],
-          options: [
-            {
-              label: translations['fields:customURL'],
-              value: 'custom',
-            },
-          ],
-          required: true,
-          type: 'radio',
-        },
-        {
-          name: 'url',
-          label: translations['fields:enterURL'],
-          required: true,
-          type: 'text',
-          validate: (value: string) => {
-            if (value && !validateUrl(value)) {
-              return 'Invalid URL'
-            }
-          },
-        },
-      ] as Field[],
-      type: 'group',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => {
+            return [
+                // ...defaultFeatures,
+                ParagraphFeature(),
+                ItalicTextFeature(),
+                BoldTextFeature(),
+                StrikethroughTextFeature(),
+                LinkFeature({}),
+            ]
+        }
+    })
     },
   ]
 
   // Only display internal link-specific fields / options / conditions if there are enabled relations
   if (enabledRelations?.length) {
-    ;(baseFields[1].fields[0] as RadioField).options.push({
-      label: translations['fields:internalLink'],
-      value: 'internal',
-    })
-    ;(baseFields[1].fields[1] as TextField).admin = {
-      condition: ({ fields }) => fields?.linkType !== 'internal',
-    }
+    // ;(baseFields[1].fields[0] as RadioField).options.push({
+    //   label: translations['fields:internalLink'],
+    //   value: 'internal',
+    // })
+    // ;(baseFields[1].fields[1] as TextField).admin = {
+    //   condition: ({ fields }) => fields?.linkType !== 'internal',
+    // }
 
-    baseFields[1].fields.push({
-      name: 'doc',
-      admin: {
-        condition: ({ fields }) => {
-          return fields?.linkType === 'internal'
-        },
-      },
-      // when admin.hidden is a function we need to dynamically call hidden with the user to know if the collection should be shown
-      filterOptions:
-        !enabledCollections && !disabledCollections
-          ? ({ relationTo, user }) => {
-              const hidden = config.collections.find(({ slug }) => slug === relationTo).admin.hidden
-              if (typeof hidden === 'function' && hidden({ user } as { user: User })) {
-                return false
-              }
-            }
-          : null,
-      label: translations['fields:chooseDocumentToLink'],
-      relationTo: enabledRelations,
-      required: true,
-      type: 'relationship',
-    })
+    // baseFields[1].fields.push({
+    //   name: 'doc',
+    //   admin: {
+    //     condition: ({ fields }) => {
+    //       return fields?.linkType === 'internal'
+    //     },
+    //   },
+    //   // when admin.hidden is a function we need to dynamically call hidden with the user to know if the collection should be shown
+    //   filterOptions:
+    //     !enabledCollections && !disabledCollections
+    //       ? ({ relationTo, user }) => {
+    //           const hidden = config.collections.find(({ slug }) => slug === relationTo).admin.hidden
+    //           if (typeof hidden === 'function' && hidden({ user } as { user: User })) {
+    //             return false
+    //           }
+    //         }
+    //       : null,
+    //   label: translations['fields:chooseDocumentToLink'],
+    //   relationTo: enabledRelations,
+    //   required: true,
+    //   type: 'relationship',
+    // })
   }
 
-  baseFields[1].fields.push({
-    name: 'newTab',
-    label: translations['fields:openInNewTab'],
-    type: 'checkbox',
-  })
+  // baseFields[1].fields.push({
+  //   name: 'newTab',
+  //   label: translations['fields:openInNewTab'],
+  //   type: 'checkbox',
+  // })
 
   return baseFields as Field[]
 }

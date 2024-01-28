@@ -22,7 +22,7 @@ export const CustomSuperscriptHTMLLinkConverter = {
             ? node.fields.url
             : (node.fields.doc?.value as string)
 
-        return `<a href="${href}"${rel}>${childrenText}</a>`
+        return `<sup><a href="${href}"${rel}>${childrenText}</a></sup>`
       },
       nodeTypes: [CustomSuperscriptLinkNode.getType()],
     } as HTMLConverter<SerializedLinkNode>

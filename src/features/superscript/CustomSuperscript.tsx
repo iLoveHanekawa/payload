@@ -7,7 +7,7 @@ import { EditorConfig, createCommand, COMMAND_PRIORITY_LOW, SerializedTextNode, 
 import { mergeRegister } from '@lexical/utils'
 import { $getSelection, $nodesOfType, $createTextNode, $isRangeSelection, TextNode, FORMAT_TEXT_COMMAND, $applyNodeReplacement, type LexicalNode } from 'lexical'
 import { useEffect } from 'react';
-import { $getCustomSuperscriptLinkAncestor } from './nodes/CustomSuperscriptLinkNode';
+import { $getCustomSuperscriptLinkAncestor, $isCustomSuperscriptLinkNode } from './nodes/CustomSuperscriptLinkNode';
 import { LinkPayload } from '@payloadcms/richtext-lexical/dist/field/features/Link/plugins/floatingLinkEditor/types';
 import { TOGGLE_CUSTOM_SUPERSCRIPT_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor/commands';
 
@@ -131,7 +131,7 @@ export function ImmutableTextNodePlugin(): null {
                             doc: null,
                             linkType: 'custom',
                             newTab: false,
-                            url: 'https://'
+                            url: `#footer-${maxKey - 1}`
                         },
                         text
                     }
@@ -149,7 +149,17 @@ export function ImmutableTextNodePlugin(): null {
                     immutableTextNodes.forEach(node => {
                         node.setTextContent(number.toString());
                         number += 1;
+                        const parent = node.getParent();
+                        if($isCustomSuperscriptLinkNode(parent)) {
+                            parent.setFields({
+                                url: `#footer-${number - 1}`,
+                                doc: null,
+                                linkType: 'custom',
+                                newTab: false
+                            })
+                        }
                     })
+                    
                 });
                 return false;
             }, COMMAND_PRIORITY_LOW),

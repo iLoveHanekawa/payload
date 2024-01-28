@@ -8,7 +8,7 @@ import ImmutableTextNode from './CustomSuperscript'
 
 export const CustomSuperscriptHTMLConverter = {
       converter: async ({ node }) => {
-        return `<footer>${node.text}</footer>`
+        return `${node.text}`
       },
       nodeTypes: [ImmutableTextNode.getType()],
     } as HTMLConverter<SerializedTextNode>

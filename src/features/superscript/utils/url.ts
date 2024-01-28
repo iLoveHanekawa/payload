@@ -9,7 +9,6 @@ export function sanitizeUrl(url: string): string {
     url = String(url).trim()
   
     if (url.match(SAFE_URL_PATTERN) != null || url.match(DATA_URL_PATTERN) != null) return url
-  
     return 'https://'
   }
   
@@ -22,7 +21,8 @@ export function sanitizeUrl(url: string): string {
     // Maybe show a dialog where they user can type the URL before inserting it.
   
     if (url === 'https://') return true
-  
+    // is it vulnerable to xss? 
+    if (url.startsWith('#')) return true
     // This makes sure URLs starting with www. instead of https are valid too
     if (urlRegExp.test(url)) return true
   

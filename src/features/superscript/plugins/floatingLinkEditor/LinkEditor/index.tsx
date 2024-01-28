@@ -60,7 +60,6 @@ export function LinkEditor({
   const { getDocPreferences } = useDocumentInfo()
 
   const [initialState, setInitialState] = useState<Fields>({})
-
   const [fieldSchema] = useState(() => {
     const fieldsUnsanitized = transformExtraFields(
       customFieldSchema,
@@ -79,6 +78,8 @@ export function LinkEditor({
 
     return fields
   })
+  console.log(fieldSchema);
+
 
   const { closeModal, toggleModal } = useModal()
   const editDepth = useEditDepth()

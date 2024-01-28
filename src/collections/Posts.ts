@@ -20,10 +20,11 @@ const Posts: CollectionConfig = {
                 features: ({ defaultFeatures }) => {
                     return [
                         // ...defaultFeatures,
+                        BoldTextFeature(),
                         CustomSuperscriptFeature(),
                         LinkFeature({
                             fields: [{
-                                name: 'Random',
+                                name: 'random',
                                 type: 'richText'
                             }]
                         }),

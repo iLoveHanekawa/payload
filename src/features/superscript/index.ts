@@ -101,7 +101,7 @@ export const CustomSuperscriptFeature = (): FeatureProvider => {
                                 onClick: ({ editor, isActive }) => {
                                     editor.dispatchCommand(PUSH_CUSTOM_SUPERSCRIPT_NODE, null);
                                 },
-                                order: 1,
+                                order: 6,
                             }
                         ])
                     ]

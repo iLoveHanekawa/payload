@@ -1,4 +1,4 @@
-import { BoldTextFeature, HTMLConverterFeature, HeadingFeature, InlineCodeTextFeature, LinkFeature, OrderedListFeature, TreeViewFeature, UnorderedListFeature, lexicalEditor, lexicalHTML } from '@payloadcms/richtext-lexical';
+import { AlignFeature, BoldTextFeature, HTMLConverterFeature, HeadingFeature, IndentFeature, InlineCodeTextFeature, ItalicTextFeature, LinkFeature, OrderedListFeature, StrikethroughTextFeature, TreeViewFeature, UnderlineTextFeature, UnorderedListFeature, lexicalEditor, lexicalHTML } from '@payloadcms/richtext-lexical';
 import { CollectionConfig } from 'payload/types'
 import { MarkFeature } from '../features/mark';
 import { markHTMLConverter } from '../features/mark/MarkHTMLConverter';
@@ -20,15 +20,22 @@ const Posts: CollectionConfig = {
                 features: ({ defaultFeatures }) => {
                     return [
                         // ...defaultFeatures,
+                        HeadingFeature({}),
+                        AlignFeature(),
+                        IndentFeature(),
                         BoldTextFeature(),
+                        ItalicTextFeature(),
+                        UnderlineTextFeature(),
+                        StrikethroughTextFeature(),
                         CustomSuperscriptFeature(),
+                        InlineCodeTextFeature(),
                         LinkFeature({
                             fields: [{
                                 name: 'random',
                                 type: 'richText'
                             }]
                         }),
-                        MarkFeature(),
+                        // MarkFeature(),
                         HTMLConverterFeature({converters({ defaultConverters }) {
                             return [...defaultConverters, markHTMLConverter]
                         },}),

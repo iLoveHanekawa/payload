@@ -1,15 +1,22 @@
 'use client'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { TOGGLE_LINK_WITH_MODAL_COMMAND } from '@payloadcms/richtext-lexical/dist/field/features/Link/plugins/floatingLinkEditor/LinkEditor/commands'
-import { LinkNode, SerializedLinkNode, TOGGLE_LINK_COMMAND, type LinkFields, $createLinkNode } from "@payloadcms/richtext-lexical";
-import { EditorConfig, createCommand, COMMAND_PRIORITY_LOW, SerializedTextNode, LexicalEditor, KEY_BACKSPACE_COMMAND as PARENT_KEY_BACKSPACE } from "lexical";
+import { defaultEditorConfig, defaultEditorFeatures, sanitizeEditorConfig, lexicalEditor, consolidateHTMLConverters, convertLexicalToHTML, type EditorConfig as PayloadEditorConfig, $createLinkNode } from "@payloadcms/richtext-lexical";
+import { CustomSuperscriptFeature } from '.';
+import { type EditorConfig, createCommand, COMMAND_PRIORITY_LOW, SerializedTextNode, LexicalEditor } from "lexical";
 import { mergeRegister } from '@lexical/utils'
-import { $getSelection, $nodesOfType, $createTextNode, $isRangeSelection, TextNode, FORMAT_TEXT_COMMAND, $applyNodeReplacement, type LexicalNode } from 'lexical'
+import { $generateNodesFromDOM } from '@lexical/html'
+import { $getSelection, $nodesOfType, $isRangeSelection, TextNode, FORMAT_TEXT_COMMAND } from 'lexical'
 import { useEffect } from 'react';
-import { $getCustomSuperscriptLinkAncestor, $isCustomSuperscriptLinkNode } from './nodes/CustomSuperscriptLinkNode';
+import { $createListItemNode, ListItemNode } from '@lexical/list'
+import { $createCustomSuperscriptLinkNode, $getCustomSuperscriptLinkAncestor, $isCustomSuperscriptLinkNode, CustomSuperscriptLinkNode } from './nodes/CustomSuperscriptLinkNode';
 import { LinkPayload } from '@payloadcms/richtext-lexical/dist/field/features/Link/plugins/floatingLinkEditor/types';
 import { TOGGLE_CUSTOM_SUPERSCRIPT_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor/commands';
+import { $createSuperscriptFooterNode, SuperscriptFooterNode } from './nodes/FooterNode';
+import { type SerializedEditorState, type LexicalNode, ParagraphNode } from 'lexical'
+import {
+  getEnabledNodes,
+} from '@payloadcms/richtext-lexical'
 
 export default class ImmutableTextNode extends TextNode {
 
@@ -68,7 +75,6 @@ export const $createImmutableTextNode = (__text: string, __key?: string): Immuta
 export const PUSH_CUSTOM_SUPERSCRIPT_NODE = createCommand('pushCustomSuperscriptNode');
 export const RESOLVE_CUSTOM_SUPERSCRIPT_NODE_COUNT = createCommand('resolveCustomSuperscriptNodeCount');
 export const KEY_BACKSPACE_COMMAND = createCommand('customKeyBackspace');
-
 
 export function ImmutableTextNodePlugin(): null {
     const [editor] = useLexicalComposerContext();
@@ -136,10 +142,25 @@ export function ImmutableTextNodePlugin(): null {
             }, COMMAND_PRIORITY_LOW),
             // try to optimize this because it looks performance taxing
             editor.registerCommand(RESOLVE_CUSTOM_SUPERSCRIPT_NODE_COUNT, () => {
-                editor.update(() => {
+                async function lexicaltToHTML(editorData: SerializedEditorState, editorConfig: PayloadEditorConfig) {
+                    const sanitizedConfig = sanitizeEditorConfig(editorConfig);
+                    return await convertLexicalToHTML({
+                      converters: consolidateHTMLConverters({ editorConfig: sanitizedConfig }),
+                      data: editorData,
+                    })
+                  }
+                editor.update(async() => {
                     const immutableTextNodes = $nodesOfType(ImmutableTextNode);
+                    if(immutableTextNodes.length === 0) return;
+                    const footerNodes = $nodesOfType(SuperscriptFooterNode);
+                    if(footerNodes.length > 0) {
+                        footerNodes[0].remove();
+                    }
+                    const newFooter = $createSuperscriptFooterNode();
                     let number = 1;
-                    immutableTextNodes.forEach(node => {
+                    const len = immutableTextNodes.length;
+                    for(let i = 0; i < len; i++) {
+                        const node = immutableTextNodes[i];
                         node.setTextContent(number.toString());
                         number += 1;
                         const parent = node.getParent();
@@ -149,9 +170,16 @@ export function ImmutableTextNodePlugin(): null {
                                 ...oldFields,
                                 url: `#footer-${number - 1}`,
                             })
+                            const cloneSuper = $createCustomSuperscriptLinkNode({ fields: parent.getFields() });
+                            const listItemNode = $createListItemNode(false);
+                            listItemNode.append(cloneSuper);
+                            newFooter.append(listItemNode);
                         }
-                    })
-                    
+                    }
+                    const paraNodes = $nodesOfType(ParagraphNode);
+                    const root = paraNodes[0].getParent();
+                    root.append(newFooter);
+                    //create a footer node if it doesn't exist
                 });
                 return false;
             }, COMMAND_PRIORITY_LOW),

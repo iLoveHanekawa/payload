@@ -130,8 +130,6 @@ export function LinkEditor({
         text: linkParent.getTextContent(),
       }
 
-      
-      console.log({bla: linkParent.getFields()})
 
       if (linkParent.getFields()?.linkType === 'custom') {
         setLinkUrl(linkParent.getFields()?.url ?? '')
@@ -206,19 +204,14 @@ export function LinkEditor({
     return true
   }, [anchorElem, editor, fieldSchema, config, getDocPreferences, locale, t, user, i18n])
 
-  console.log({editor});
   const editorState = editor.getEditorState();
   useEffect(() => {
-    console.log('hit');
     // name: 'Important'
-    console.log({editorState});
     async function lexicaltToHTML(editorData: SerializedEditorState, editorConfig: EditorConfig) {
-      console.log({editorData});
       const sanitizedConfig = sanitizeEditorConfig(editorConfig);
       const editorConfigForRender = await editorConfig.lexical();
       const lexEditor = lexicalEditor({ features: [...editorConfig.features, CustomSuperscriptFeature()], lexical: editorConfigForRender })
       
-      console.log('set adapter invoked');
       setadapter(lexEditor);
       return await convertLexicalToHTML({
         converters: consolidateHTMLConverters({ editorConfig: sanitizedConfig }),
@@ -229,17 +222,14 @@ export function LinkEditor({
       await editorState.read(async () => {
         const selection = $getSelection()
         // Handle the data displayed in the floating link editor & drawer when you click on a link node
-        console.log({selection});
         if ($isRangeSelection(selection)) {
           const node = getSelectedNode(selection)
           const linkParent: CustomSuperscriptLinkNode = $findMatchingParent(node, $isCustomSuperscriptLinkNode) as CustomSuperscriptLinkNode
-          console.log({linkParent})
           // Initial state:
           if(linkParent && linkParent.getFields()?.content) {
 
             const res = linkParent.getFields()?.content as SerializedEditorState
             const editorConfig = defaultEditorConfig
-            console.log({editorConfig});
             editorConfig.features = [
               ...defaultEditorFeatures,
             ]
@@ -251,7 +241,6 @@ export function LinkEditor({
     }
     readFromEditor();
   }, [editor, editorState])
-  console.log(adapter);
   useEffect(() => {
     return mergeRegister(
       editor.registerCommand(
@@ -390,7 +379,6 @@ export function LinkEditor({
         drawerSlug={drawerSlug}
         fieldSchema={fieldSchema}
         handleModalSubmit={(fields: Fields, data: Data) => {
-          console.log({data});
           closeModal(drawerSlug)
 
           const newLinkPayload: CustomSuperscriptLinkPayload = data as CustomSuperscriptLinkPayload

@@ -11,4 +11,4 @@ export const CustomSuperscriptHTMLConverter = {
         return `${node.text}`
       },
       nodeTypes: [ImmutableTextNode.getType()],
-    } as HTMLConverter<SerializedTextNode>
+} as HTMLConverter<SerializedTextNode>

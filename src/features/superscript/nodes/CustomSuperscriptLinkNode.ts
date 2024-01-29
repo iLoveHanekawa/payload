@@ -235,7 +235,6 @@ export class CustomSuperscriptLinkNode extends ElementNode {
         anchor.rel = manageRel(anchor.rel, 'remove', 'noopener')
       }
     }
-
     return false
   }
 }

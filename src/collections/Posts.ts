@@ -26,6 +26,7 @@ const Posts: CollectionConfig = {
                         BoldTextFeature(),
                         ItalicTextFeature(),
                         UnderlineTextFeature(),
+                        MarkFeature(),
                         StrikethroughTextFeature(),
                         CustomSuperscriptFeature(),
                         InlineCodeTextFeature(),

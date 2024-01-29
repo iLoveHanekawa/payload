@@ -1,4 +1,4 @@
-import { BoldTextFeature, FeatureProvider, HTMLConverterFeature, ItalicTextFeature, LinkFeature, LinkNode, ParagraphFeature, StrikethroughTextFeature, TextHTMLConverter, lexicalEditor } from "@payloadcms/richtext-lexical";
+import { BoldTextFeature, FeatureProvider, HTMLConverterFeature, ItalicTextFeature, LinkFeature, LinkNode, ParagraphFeature, StrikethroughTextFeature, TextHTMLConverter, lexicalEditor, lexicalHTML } from "@payloadcms/richtext-lexical";
 import { SectionWithEntries } from "@payloadcms/richtext-lexical/dist/field/features/format/common/floatingSelectToolbarSection";
 import ImmutableTextNode from "./CustomSuperscript";
 import { LinkFeatureProps } from "@payloadcms/richtext-lexical";

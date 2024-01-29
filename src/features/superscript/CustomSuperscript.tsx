@@ -1,22 +1,23 @@
 'use client'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { defaultEditorConfig, defaultEditorFeatures, sanitizeEditorConfig, lexicalEditor, consolidateHTMLConverters, convertLexicalToHTML, type EditorConfig as PayloadEditorConfig, $createLinkNode } from "@payloadcms/richtext-lexical";
+import { defaultEditorConfig, defaultEditorFeatures, sanitizeEditorConfig, lexicalEditor, consolidateHTMLConverters, convertLexicalToHTML, type EditorConfig as PayloadEditorConfig, $createLinkNode, LinkNode, LinkFields } from "@payloadcms/richtext-lexical";
 import { CustomSuperscriptFeature } from '.';
 import { type EditorConfig, createCommand, COMMAND_PRIORITY_LOW, SerializedTextNode, LexicalEditor } from "lexical";
 import { mergeRegister } from '@lexical/utils'
 import { $generateNodesFromDOM } from '@lexical/html'
-import { $getSelection, $nodesOfType, $isRangeSelection, TextNode, FORMAT_TEXT_COMMAND } from 'lexical'
+import { $getSelection, $nodesOfType, $isRangeSelection, TextNode, FORMAT_TEXT_COMMAND, $isParagraphNode, SerializedParagraphNode, $createParagraphNode, $createTextNode } from 'lexical'
 import { useEffect } from 'react';
 import { $createListItemNode, ListItemNode } from '@lexical/list'
 import { $createCustomSuperscriptLinkNode, $getCustomSuperscriptLinkAncestor, $isCustomSuperscriptLinkNode, CustomSuperscriptLinkNode } from './nodes/CustomSuperscriptLinkNode';
 import { LinkPayload } from '@payloadcms/richtext-lexical/dist/field/features/Link/plugins/floatingLinkEditor/types';
 import { TOGGLE_CUSTOM_SUPERSCRIPT_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor/commands';
 import { $createSuperscriptFooterNode, SuperscriptFooterNode } from './nodes/FooterNode';
-import { type SerializedEditorState, type LexicalNode, ParagraphNode } from 'lexical'
+import { type SerializedEditorState, type LexicalNode, ParagraphNode, SerializedLexicalNode, $isTextNode, SerializedEditor } from 'lexical'
 import {
-  getEnabledNodes,
+  getEnabledNodes, SerializedLinkNode, $isLinkNode
 } from '@payloadcms/richtext-lexical'
+import { SerializedLexicalNodeWithParent } from '@payloadcms/richtext-lexical/dist/field/features/converters/html/converter/types';
 
 export default class ImmutableTextNode extends TextNode {
 
@@ -149,7 +150,30 @@ export function ImmutableTextNodePlugin(): null {
                       data: editorData,
                     })
                   }
+                  
                 editor.update(async() => {
+                    // disgusting mess of casting, fix this asap 
+                    function dfs(node: SerializedLexicalNode): LexicalNode {
+                        let parentNode: LexicalNode = null;
+                        if(node.type === 'paragraph') {
+                            parentNode = $createParagraphNode();
+                        }
+                        else if(node.type === 'text') {
+                            parentNode = $createTextNode((node as SerializedTextNode).text);
+                            (parentNode as TextNode).setFormat((node as SerializedTextNode).format);
+                        }
+                        else if(node.type === 'link') {
+                            parentNode = $createLinkNode({
+                                fields: (node as SerializedLinkNode).fields
+                            });
+                        }
+                        if("children" in node) {
+                            (node.children as SerializedLexicalNode[]).forEach(child => {
+                                (parentNode as ParagraphNode | LinkNode).append(dfs(child));
+                            })
+                        }
+                        return parentNode;
+                    }
                     const immutableTextNodes = $nodesOfType(ImmutableTextNode);
                     if(immutableTextNodes.length === 0) return;
                     const footerNodes = $nodesOfType(SuperscriptFooterNode);
@@ -170,10 +194,23 @@ export function ImmutableTextNodePlugin(): null {
                                 ...oldFields,
                                 url: `#footer-${number - 1}`,
                             })
-                            const cloneSuper = $createCustomSuperscriptLinkNode({ fields: parent.getFields() });
-                            const listItemNode = $createListItemNode(false);
-                            listItemNode.append(cloneSuper);
-                            newFooter.append(listItemNode);
+                            console.log({fields: parent.__fields})
+                            const newListItem = $createListItemNode(false);
+                            const fields: LinkFields & { content?: { root?: { children: SerializedParagraphNode[] } } } = parent.getFields();
+                            console.log(fields);
+                            if("content" in fields) {
+                                const getLexicalFieldNodesJSON = fields.content;
+                                console.log(parent.getFields().content);
+                                // dfs the children
+                                if("root" in getLexicalFieldNodesJSON) {
+                                    const paragraphs = getLexicalFieldNodesJSON.root.children as SerializedParagraphNode[]
+                                    paragraphs.forEach(paragraph => {
+                                        newListItem.append(dfs(paragraph));
+                                    })
+                                }
+                                // its safe to assume for this use case that all nodes under root will be paragraph nodes
+                            }
+                            newFooter.append(newListItem);
                         }
                     }
                     const paraNodes = $nodesOfType(ParagraphNode);

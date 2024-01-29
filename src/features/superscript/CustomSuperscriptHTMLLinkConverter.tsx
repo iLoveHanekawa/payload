@@ -12,6 +12,7 @@ export const CustomSuperscriptHTMLLinkConverter = {
           parent: {
             ...node,
             parent,
+            version: 2
           },
         })
 
@@ -21,8 +22,7 @@ export const CustomSuperscriptHTMLLinkConverter = {
           node.fields.linkType === 'custom'
             ? node.fields.url
             : (node.fields.doc?.value as string)
-        console.log(childrenText);
-        return `${childrenText}`
+        return `<sup><a href=${href} rel=${rel}>${childrenText}</a></span>`
       },
       nodeTypes: [CustomSuperscriptLinkNode.getType()],
     } as HTMLConverter<SerializedLinkNode>

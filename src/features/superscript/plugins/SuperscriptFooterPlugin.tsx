@@ -21,6 +21,7 @@ export function SuperscriptFooterPlugin(): null {
         editor.registerCommand(
             INSERT_PARAGRAPH_COMMAND, () => {
               const nodes = $nodesOfType(ParagraphNode);
+              if(nodes.length === 0) return false;
               const parent = nodes[0].getParent();
               const superscriptFooterNodes = $nodesOfType(SuperscriptFooterNode);
               let footerNode: SuperscriptFooterNode | null = null;

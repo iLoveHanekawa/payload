@@ -17,7 +17,7 @@ import { markHTMLConverter } from './features/mark/MarkHTMLConverter'
 export default buildConfig({
   admin: {
     user: Users.slug,
-    bundler: webpackBundler(),
+    bundler: viteBundler(),
   },
   editor: lexicalEditor({
     features: (({ defaultFeatures }) => {

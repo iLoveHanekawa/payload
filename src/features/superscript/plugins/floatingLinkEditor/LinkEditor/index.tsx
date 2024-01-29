@@ -1,8 +1,14 @@
 'use client'
 import type { Data, Fields } from 'payload/types'
-
+import { EditorConfig, LexicalRichTextAdapter, defaultEditorConfig, defaultEditorFeatures, type SanitizedEditorConfig } from '@payloadcms/richtext-lexical'
 import { useModal } from '@faceless-ui/modal'
+import { ResolvedFeatureMap, sanitizeEditorConfig } from '@payloadcms/richtext-lexical'
+import {  } from 'lexical'
+import RichText from 'payload/dist/admin/components/forms/field-types/RichText'
+import {} from '@lexical/utils'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import {
   $getSelection,
@@ -10,6 +16,7 @@ import {
   COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW,
   KEY_ESCAPE_COMMAND,
+  SerializedEditorState,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
 import { formatDrawerSlug } from 'payload/components/elements'
@@ -21,13 +28,13 @@ import {
   useEditDepth,
   useLocale,
 } from 'payload/components/utilities'
-import { sanitizeFields } from 'payload/config'
+import { sanitizeFields } from './sanitize'
 import { getTranslation } from 'payload/utilities'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CustomSuperscriptLinkNode, $isCustomSuperscriptLinkNode, TOGGLE_CUSTOM_SUPERSCRIPT_LINK_COMMAND } from '../../../nodes/CustomSuperscriptLinkNode'
 import { CustomSuperscriptLinkPayload } from '../../../nodes/CustomSuperscriptLinkNode'
-import { LinkFeatureProps } from "@payloadcms/richtext-lexical";
+import { LinkFeatureProps, consolidateHTMLConverters, convertLexicalNodesToHTML, convertLexicalToHTML } from "@payloadcms/richtext-lexical";
 
 
 import { useEditorConfigContext } from '@payloadcms/richtext-lexical/dist/field/lexical/config/EditorConfigProvider'
@@ -36,6 +43,8 @@ import { setFloatingElemPositionForLinkEditor } from '@payloadcms/richtext-lexic
 import { LinkDrawer } from '../../../drawer'
 import { transformExtraFields } from '../utilities'
 import { TOGGLE_CUSTOM_SUPERSCRIPT_LINK_WITH_MODAL_COMMAND } from './commands'
+import { ElementNode } from '@payloadcms/richtext-slate'
+import { CustomSuperscriptFeature } from '../../..'
 
 export function LinkEditor({
   anchorElem,
@@ -43,7 +52,10 @@ export function LinkEditor({
   enabledCollections,
   fields: customFieldSchema,
 }: { anchorElem: HTMLElement } & LinkFeatureProps): JSX.Element {
+  const [adapter, setadapter] = useState<LexicalRichTextAdapter | null>(null);
+
   const [editor] = useLexicalComposerContext()
+  const [preview, setPreview] = React.useState<string>('');
 
   const editorRef = useRef<HTMLDivElement | null>(null)
   const [linkUrl, setLinkUrl] = useState('')
@@ -87,7 +99,7 @@ export function LinkEditor({
   const drawerSlug = formatDrawerSlug({
     depth: editDepth,
     slug: `lexical-rich-text-custom-superscript-link-` + uuid,
-  })
+  })  
 
   const updateLinkEditor = useCallback(async () => {
     const selection = $getSelection()
@@ -100,6 +112,7 @@ export function LinkEditor({
       const linkParent: CustomSuperscriptLinkNode = $findMatchingParent(node, $isCustomSuperscriptLinkNode) as CustomSuperscriptLinkNode
       if (linkParent == null) {
         setIsLink(false)
+        setPreview('')
         setLinkUrl('')
         setLinkLabel('')
         return
@@ -116,6 +129,9 @@ export function LinkEditor({
         },
         text: linkParent.getTextContent(),
       }
+
+      
+      console.log({bla: linkParent.getFields()})
 
       if (linkParent.getFields()?.linkType === 'custom') {
         setLinkUrl(linkParent.getFields()?.url ?? '')
@@ -190,6 +206,52 @@ export function LinkEditor({
     return true
   }, [anchorElem, editor, fieldSchema, config, getDocPreferences, locale, t, user, i18n])
 
+  console.log({editor});
+  const editorState = editor.getEditorState();
+  useEffect(() => {
+    console.log('hit');
+    // name: 'Important'
+    console.log({editorState});
+    async function lexicaltToHTML(editorData: SerializedEditorState, editorConfig: EditorConfig) {
+      console.log({editorData});
+      const sanitizedConfig = sanitizeEditorConfig(editorConfig);
+      const editorConfigForRender = await editorConfig.lexical();
+      const lexEditor = lexicalEditor({ features: [...editorConfig.features, CustomSuperscriptFeature()], lexical: editorConfigForRender })
+      
+      console.log('set adapter invoked');
+      setadapter(lexEditor);
+      return await convertLexicalToHTML({
+        converters: consolidateHTMLConverters({ editorConfig: sanitizedConfig }),
+        data: editorData,
+      })
+    }
+    async function readFromEditor() {
+      await editorState.read(async () => {
+        const selection = $getSelection()
+        // Handle the data displayed in the floating link editor & drawer when you click on a link node
+        console.log({selection});
+        if ($isRangeSelection(selection)) {
+          const node = getSelectedNode(selection)
+          const linkParent: CustomSuperscriptLinkNode = $findMatchingParent(node, $isCustomSuperscriptLinkNode) as CustomSuperscriptLinkNode
+          console.log({linkParent})
+          // Initial state:
+          if(linkParent && linkParent.getFields()?.content) {
+
+            const res = linkParent.getFields()?.content as SerializedEditorState
+            const editorConfig = defaultEditorConfig
+            console.log({editorConfig});
+            editorConfig.features = [
+              ...defaultEditorFeatures,
+            ]
+            const html = await lexicaltToHTML(res, editorConfig)
+            setPreview(html);
+          }
+        }
+      })
+    }
+    readFromEditor();
+  }, [editor, editorState])
+  console.log(adapter);
   useEffect(() => {
     return mergeRegister(
       editor.registerCommand(
@@ -218,6 +280,8 @@ export function LinkEditor({
       editorRef.current.style.transform = 'translate(-10000px, -10000px)'
     }
   }, [isLink])
+
+  
 
   useEffect(() => {
     const scrollerElem = anchorElem.parentElement
@@ -278,14 +342,20 @@ export function LinkEditor({
       void updateLinkEditor()
     })
   }, [editor, updateLinkEditor])
-
+  const sanitizedConfig = sanitizeEditorConfig(defaultEditorConfig);
+  const lexical = defaultEditorConfig.lexical().then(value => {
+    return value;
+  });
+  const lexicalEditorx = lexicalEditor({});
   return (
     <React.Fragment>
       <div className="link-editor" ref={editorRef}>
         <div className="link-input">
-          <a href={linkUrl} rel="noopener noreferrer" target="_blank">
-            {linkLabel != null && linkLabel.length > 0 ? linkLabel : linkUrl}
-          </a>
+          <div className='dumb-crawler' dangerouslySetInnerHTML={{__html: preview}}></div>
+          {/* {
+            adapter &&
+            <RichText  name='content' type='richText' editor={adapter} />
+          } */}
           {editor.isEditable() && (
             <React.Fragment>
               <button

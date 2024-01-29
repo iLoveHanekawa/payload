@@ -203,8 +203,8 @@ export class CustomSuperscriptLinkNode extends ElementNode {
 
   setFields(fields: CustomSuperscriptLinkFields): void {
     const writable = this.getWritable()
-    console.log({ writable });
-    console.log({ setFieldsFields: fields});
+    // console.log({ writable });
+    // console.log({ setFieldsFields: fields});
     writable.__fields = fields
   }
 
@@ -272,14 +272,14 @@ export const TOGGLE_CUSTOM_SUPERSCRIPT_LINK_COMMAND: LexicalCommand<CustomSupers
 export function toggleCustomSuperscriptLink(payload: LinkPayload): void {
   const selection = $getSelection()
   
-  console.log({ payload, selection });
+  // console.log({ payload, selection });
 
   if(!$isRangeSelection(selection)) {
     return;
   }
 
   if (payload === null) {
-    console.log('in null');
+    // console.log('in null');
     const nodes = selection.extract()
     // Remove LinkNodes
     nodes.forEach((node) => {
@@ -299,10 +299,10 @@ export function toggleCustomSuperscriptLink(payload: LinkPayload): void {
     // if (!$isRangeSelection(selection)) {
     //   return
     // }
-    console.log('in else');
+    // console.log('in else');
     const nodes = selection.getNodes();
     if (nodes.length === 1) {
-      console.log('one node');
+      // console.log('one node');
       const firstNode = nodes[0]
       // if the first node is a LinkNode or if its
       // parent is a LinkNode, we update the URL, target and rel.
@@ -310,10 +310,10 @@ export function toggleCustomSuperscriptLink(payload: LinkPayload): void {
         ? firstNode
         : $getCustomSuperscriptLinkAncestor(firstNode)
       if (linkNode !== null) {
-        console.log('target area');
-        console.log({ linkNodeBefore: linkNode })
+        // console.log('target area');
+        // console.log({ linkNodeBefore: linkNode })
         linkNode.setFields(payload.fields)
-        console.log({ linkNodeAfter: linkNode })
+        // console.log({ linkNodeAfter: linkNode })
         if (payload.text != null && payload.text !== linkNode.getTextContent()) {
           // remove all children and add child with new textcontent:
           linkNode.append($createImmutableTextNode(payload.text))

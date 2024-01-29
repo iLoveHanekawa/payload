@@ -38,11 +38,10 @@ html[data-theme='light'] {
 
     a {
       text-decoration: none;
-      display: block;
+      display: inline;
+      margin-right: 0;
       white-space: nowrap;
       overflow: hidden;
-      margin-right: 30px;
-      text-overflow: ellipsis;
       color: var(--color-blue-600);
       border-bottom: 1px dotted;
 
@@ -75,4 +74,22 @@ html[data-theme='light'] {
   .link-trash {
     background-image: url(../../icons/Remove/index.svg);
   }
+}
+
+.dumb-crawler p {
+  display: inline;
+  text-overflow: ellipsis;
+  margin-right: 30px;
+}
+
+.dumb-crawler, .dumb-crawler * {
+  margin: 0;
+  padding: 0;
+  display: inline;
+  color: rgb(37, 37, 37);
+  font-family: inherit;
+}
+
+.dumb-crawler, a {
+  color: var(--color-blue-600)
 }

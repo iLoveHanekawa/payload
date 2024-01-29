@@ -95,7 +95,7 @@ export const RenderFields: React.FC<Props> = (props) => {
             if (field) {
               return (
                 <RenderCustomComponent
-                  CustomComponent={field?.admin?.components?.Field}
+                  // CustomComponent={field?.admin?.components?.Field}
                   DefaultComponent={FieldComponent}
                   componentProps={{
                     ...field,

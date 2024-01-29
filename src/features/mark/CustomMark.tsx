@@ -210,7 +210,7 @@ export function CustomMarkPlugin(): null {
                         }
                     }
                 }
-                return true;
+                return false;
             }, COMMAND_PRIORITY_LOW)
         )
     }, [editor])

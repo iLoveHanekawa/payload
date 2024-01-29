@@ -93,3 +93,7 @@ html[data-theme='light'] {
 .dumb-crawler, a {
   color: var(--color-blue-600)
 }
+
+.custom-superscript-editor .field-type.text {
+  display: none;
+}

@@ -21,7 +21,7 @@ export const LinkDrawer: React.FC<Props> = ({
   const { t } = useTranslation('fields')
 
   return (
-    <Drawer className={baseClass} slug={drawerSlug} title={t('Edit Footnote') ?? ''}>
+    <Drawer className={baseClass + ' custom-supscript-drawer'} slug={drawerSlug} title={t('Edit Footnote') ?? ''}>
       <Form fields={fieldSchema} initialState={initialState} onSubmit={handleModalSubmit}>
         <RenderFields
           fieldSchema={fieldSchema}

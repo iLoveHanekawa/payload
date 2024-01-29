@@ -51,6 +51,11 @@ export const getBaseFields = (
       label: translations['fields:textToDisplay'],
       required: true,
       type: 'text',
+      admin: {
+        style: {
+          display: 'none'
+        }
+      }
     },
     {
       name: 'fields',
@@ -66,6 +71,9 @@ export const getBaseFields = (
         {
           name: 'linkType',
           admin: {
+            style: {
+              display: 'none'
+            },
             description: translations['fields:chooseBetweenCustomTextOrDocument'],
           },
           defaultValue: 'custom',
@@ -108,6 +116,9 @@ export const getBaseFields = (
     baseFields[1].fields.push({
       name: 'doc',
       admin: {
+        style: {
+          display: 'none'
+        },
         condition: ({ fields }) => {
           return fields?.linkType === 'internal'
         },
@@ -130,6 +141,11 @@ export const getBaseFields = (
   }
 
   baseFields[1].fields.push({
+    admin: {
+      style: {
+        display: 'none'
+      }
+    },
     name: 'newTab',
     label: translations['fields:openInNewTab'],
     type: 'checkbox',

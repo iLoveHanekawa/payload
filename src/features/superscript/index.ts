@@ -1,13 +1,11 @@
-import { BoldTextFeature, FeatureProvider, HTMLConverterFeature, ItalicTextFeature, LinkFeature, LinkNode, ParagraphFeature, StrikethroughTextFeature, TextHTMLConverter, lexicalEditor, lexicalHTML } from "@payloadcms/richtext-lexical";
+import { BoldTextFeature, FeatureProvider, HTMLConverterFeature, ItalicTextFeature, LinkFeature, LinkNode, ParagraphFeature, StrikethroughTextFeature, TextHTMLConverter, lexicalEditor } from "@payloadcms/richtext-lexical";
 import { SectionWithEntries } from "@payloadcms/richtext-lexical/dist/field/features/format/common/floatingSelectToolbarSection";
 import ImmutableTextNode from "./CustomSuperscript";
 import { LinkFeatureProps } from "@payloadcms/richtext-lexical";
-import { INSERT_PARAGRAPH_COMMAND } from 'lexical'
 import { PUSH_CUSTOM_SUPERSCRIPT_NODE } from "./CustomSuperscript";
 import { CustomSuperscriptLinkNode } from "./nodes/CustomSuperscriptLinkNode";
 import { ListNode, ListItemNode } from '@lexical/list'
 import { ParagraphHTMLConverter } from "@payloadcms/richtext-lexical";
-import { customSuperscriptLinkPopulationPromiseHOC } from "./populationPromise";
 import { CustomSuperscriptHTMLConverter } from "./CustomSuperscriptHTMLConverter";
 import { CustomSuperscriptHTMLLinkConverter } from "./CustomSuperscriptHTMLLinkConverter";
 import { SuperscriptFooterNode } from "./nodes/FooterNode";

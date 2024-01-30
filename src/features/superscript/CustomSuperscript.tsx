@@ -1,23 +1,20 @@
 'use client'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { defaultEditorConfig, defaultEditorFeatures, sanitizeEditorConfig, lexicalEditor, consolidateHTMLConverters, convertLexicalToHTML, type EditorConfig as PayloadEditorConfig, $createLinkNode, LinkNode, LinkFields } from "@payloadcms/richtext-lexical";
-import { CustomSuperscriptFeature } from '.';
+import { sanitizeEditorConfig, consolidateHTMLConverters, convertLexicalToHTML, type EditorConfig as PayloadEditorConfig, $createLinkNode, LinkNode, LinkFields } from "@payloadcms/richtext-lexical";
 import { type EditorConfig, createCommand, COMMAND_PRIORITY_LOW, SerializedTextNode, LexicalEditor } from "lexical";
 import { mergeRegister } from '@lexical/utils'
-import { $generateNodesFromDOM } from '@lexical/html'
 import { $getSelection, $nodesOfType, $isRangeSelection, TextNode, FORMAT_TEXT_COMMAND, $isParagraphNode, SerializedParagraphNode, $createParagraphNode, $createTextNode } from 'lexical'
 import { useEffect } from 'react';
-import { $createListItemNode, ListItemNode } from '@lexical/list'
-import { $createCustomSuperscriptLinkNode, $getCustomSuperscriptLinkAncestor, $isCustomSuperscriptLinkNode, CustomSuperscriptLinkNode } from './nodes/CustomSuperscriptLinkNode';
+import { $createListItemNode } from '@lexical/list'
+import { $getCustomSuperscriptLinkAncestor, $isCustomSuperscriptLinkNode } from './nodes/CustomSuperscriptLinkNode';
 import { LinkPayload } from '@payloadcms/richtext-lexical/dist/field/features/Link/plugins/floatingLinkEditor/types';
 import { TOGGLE_CUSTOM_SUPERSCRIPT_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor/commands';
 import { $createSuperscriptFooterNode, SuperscriptFooterNode } from './nodes/FooterNode';
-import { type SerializedEditorState, type LexicalNode, ParagraphNode, SerializedLexicalNode, $isTextNode, SerializedEditor } from 'lexical'
+import { type SerializedEditorState, type LexicalNode, ParagraphNode, SerializedLexicalNode } from 'lexical'
 import {
-  getEnabledNodes, SerializedLinkNode, $isLinkNode
+  SerializedLinkNode
 } from '@payloadcms/richtext-lexical'
-import { SerializedLexicalNodeWithParent } from '@payloadcms/richtext-lexical/dist/field/features/converters/html/converter/types';
 
 export default class ImmutableTextNode extends TextNode {
 

@@ -29,7 +29,7 @@ const Posts: CollectionConfig = {
                         // MarkFeature(),
                         StrikethroughTextFeature(),
                         CustomSuperscriptFeature(),
-                        // SubscriptTextFeature(),
+                        SubscriptTextFeature(),
                         InlineCodeTextFeature(),
                         LinkFeature({}),
                         // MarkFeature(),
